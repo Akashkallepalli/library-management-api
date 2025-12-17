@@ -1,35 +1,35 @@
+
 # Library Management System API
 
-A comprehensive RESTful API for managing library operations including books, members, borrowing transactions, and fines.
+A comprehensive RESTful API for managing library operations including books, members, borrowing transactions, and fines.[file:2]
 
 ## Features
 
-- Complete CRUD operations for books and members
-- Borrow and return book transactions
-- Automatic fine calculation for overdue books
-- Member suspension on multiple overdue books
-- Borrowing limit enforcement (max 3 books)
-- Prevention of borrowing with unpaid fines
-- 14-day standard loan period
-- 0.50/day overdue fine
+- Complete CRUD operations for books and members.[file:2]
+- Borrow and return book transactions.[file:2]
+- Automatic fine calculation for overdue books.[file:2]
+- Member suspension when multiple books are overdue.[file:2]
+- Borrowing limit enforcement (max 3 active books per member).[file:2]
+- Prevention of borrowing when unpaid fines exist.[file:2]
+- 14‑day standard loan period.[file:2]
+- Overdue fine of 0.50 per day.[file:2]
 
 ## Tech Stack
 
-- **Runtime**: Node.js
-- **Framework**: Express.js
-- **Database**: PostgreSQL
-- **ORM**: Sequelize
-- **Validation**: Joi
-- **Date/Time**: moment.js
+- Runtime: Node.js.[file:2]
+- Framework: Express.js.[file:2]
+- Database: PostgreSQL.[file:2]
+- ORM: Sequelize.[file:2]
+- Validation: Joi.[file:2]
+- Date/Time: moment.js.[file:2]
 
 ## Prerequisites
 
-- Node.js (v14 or higher)
-- PostgreSQL (v12 or higher)
-- npm or yarn
-- (Optional) Postman for API testing
+- Node.js v14 or higher.[file:2]
+- PostgreSQL v12 or higher.[file:2]
+- npm or yarn installed.[file:2]
 
-## Installation & Setup
+## Setup Instructions
 
 ### 1. Clone Repository
 
