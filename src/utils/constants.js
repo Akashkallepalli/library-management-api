@@ -1,0 +1,50 @@
+const BOOK_STATUS = {
+  AVAILABLE: 'available',
+  BORROWED: 'borrowed',
+  RESERVED: 'reserved',
+  MAINTENANCE: 'maintenance',
+};
+
+const MEMBER_STATUS = {
+  ACTIVE: 'active',
+  SUSPENDED: 'suspended',
+};
+
+const TRANSACTION_STATUS = {
+  ACTIVE: 'active',
+  RETURNED: 'returned',
+  OVERDUE: 'overdue',
+};
+
+const BUSINESS_RULES = {
+  MAX_BOOKS_PER_MEMBER: 3,
+  LOAN_PERIOD_DAYS: 14,
+  OVERDUE_FINE_PER_DAY: 0.5,
+  OVERDUE_THRESHOLD: 3,
+};
+
+const HTTP_STATUS = {
+  OK: 200,
+  CREATED: 201,
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  CONFLICT: 409,
+  INTERNAL_ERROR: 500,
+};
+
+const PAGINATION = {
+  DEFAULT_LIMIT: 10,
+  MAX_LIMIT: 100,
+  DEFAULT_OFFSET: 0,
+};
+
+module.exports = {
+  BOOK_STATUS,
+  MEMBER_STATUS,
+  TRANSACTION_STATUS,
+  BUSINESS_RULES,
+  HTTP_STATUS,
+  PAGINATION,
+};
