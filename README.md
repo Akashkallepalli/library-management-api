@@ -29,7 +29,7 @@ A comprehensive RESTful API for managing library operations including books, mem
 
 ### 1. Clone the repository
 ```bash
-git clone 
+git clone https://github.com/Akashkallepalli/library-management-api.git
 cd library-management-api
 ```
 
