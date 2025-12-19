@@ -1,50 +1,67 @@
-const BOOK_STATUS = {
-  AVAILABLE: 'available',
-  BORROWED: 'borrowed',
-  RESERVED: 'reserved',
-  MAINTENANCE: 'maintenance',
-};
-
-const MEMBER_STATUS = {
-  ACTIVE: 'active',
-  SUSPENDED: 'suspended',
-};
-
-const TRANSACTION_STATUS = {
-  ACTIVE: 'active',
-  RETURNED: 'returned',
-  OVERDUE: 'overdue',
-};
-
-const BUSINESS_RULES = {
-  MAX_BOOKS_PER_MEMBER: 3,
-  LOAN_PERIOD_DAYS: 14,
-  OVERDUE_FINE_PER_DAY: 0.5,
-  OVERDUE_THRESHOLD: 3,
-};
-
-const HTTP_STATUS = {
-  OK: 200,
-  CREATED: 201,
-  BAD_REQUEST: 400,
-  UNAUTHORIZED: 401,
-  FORBIDDEN: 403,
-  NOT_FOUND: 404,
-  CONFLICT: 409,
-  INTERNAL_ERROR: 500,
-};
-
-const PAGINATION = {
-  DEFAULT_LIMIT: 10,
-  MAX_LIMIT: 100,
-  DEFAULT_OFFSET: 0,
-};
-
 module.exports = {
-  BOOK_STATUS,
-  MEMBER_STATUS,
-  TRANSACTION_STATUS,
-  BUSINESS_RULES,
-  HTTP_STATUS,
-  PAGINATION,
+  // Book Status
+  BOOK_STATUS: {
+    AVAILABLE: 'available',
+    BORROWED: 'borrowed',
+    RESERVED: 'reserved',
+    MAINTENANCE: 'maintenance',
+    OVERDUE: 'overdue'
+  },
+
+  // Member Status
+  MEMBER_STATUS: {
+    ACTIVE: 'active',
+    SUSPENDED: 'suspended',
+    INACTIVE: 'inactive'
+  },
+
+  // Transaction Status
+  TRANSACTION_STATUS: {
+    ACTIVE: 'active',
+    RETURNED: 'returned',
+    OVERDUE: 'overdue',
+    CANCELLED: 'cancelled'
+  },
+
+  // Book Categories
+  BOOK_CATEGORIES: [
+    'Fiction',
+    'Non-Fiction',
+    'Science',
+    'Technology',
+    'Arts',
+    'History',
+    'Biography',
+    'Children',
+    'Young Adult',
+    'Mystery',
+    'Romance',
+    'Fantasy',
+    'Science Fiction',
+    'Self-Help',
+    'Business',
+    'General'
+  ],
+
+  // Business Rules
+  BUSINESS_RULES: {
+    MAX_BORROW_LIMIT: 3,
+    LOAN_PERIOD_DAYS: 14,
+    OVERDUE_FINE_RATE: 0.5, // $0.50 per day
+    SUSPENSION_THRESHOLD: 3, // Overdue books for suspension
+    FINE_PAYMENT_DAYS: 30 // Days to pay fine before penalty
+  },
+
+  // HTTP Status Codes
+  HTTP_STATUS: {
+    OK: 200,
+    CREATED: 201,
+    BAD_REQUEST: 400,
+    UNAUTHORIZED: 401,
+    FORBIDDEN: 403,
+    NOT_FOUND: 404,
+    CONFLICT: 409,
+    UNPROCESSABLE_ENTITY: 422,
+    INTERNAL_SERVER_ERROR: 500
+  }
 };

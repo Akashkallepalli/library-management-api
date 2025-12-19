@@ -1,12 +1,24 @@
 {
   "info": {
-    "_postman_id": "12345678-1234-1234-1234-123456789012",
+    "_postman_id": "library-management-api-collection",
     "name": "Library Management System API",
-    "description": "Complete API collection for Library Management System with Books, Members, Transactions, and Fines",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "123456"
+    "description": "Complete Postman collection for testing the Library Management System API"
   },
   "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": ["{{base_url}}"],
+          "path": ["health"]
+        }
+      },
+      "response": []
+    },
     {
       "name": "Books",
       "item": [
@@ -22,21 +34,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"isbn\": \"9780134685991\",\n  \"title\": \"Effective Java\",\n  \"author\": \"Joshua Bloch\",\n  \"category\": \"Programming\",\n  \"total_copies\": 5\n}"
+              "raw": "{\n  \"isbn\": \"9780132350884\",\n  \"title\": \"Clean Code: A Handbook of Agile Software Craftsmanship\",\n  \"author\": \"Robert C. Martin\",\n  \"category\": \"Technology\",\n  \"total_copies\": 5,\n  \"published_year\": 2008,\n  \"publisher\": \"Prentice Hall\"\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/api/v1/books",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "3000",
-              "path": [
-                "api",
-                "v1",
-                "books"
-              ]
-            }
+              "raw": "{{base_url}}/api/books",
+              "host": ["{{base_url}}"],
+              "path": ["api", "books"]
+            },
+            "description": "Create a new book in the library"
           },
           "response": []
         },
@@ -46,16 +51,18 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/api/v1/books",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "3000",
-              "path": [
-                "api",
-                "v1",
-                "books"
+              "raw": "{{base_url}}/api/books?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "books"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
               ]
             }
           },
@@ -67,18 +74,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/api/v1/books/available",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "3000",
-              "path": [
-                "api",
-                "v1",
-                "books",
-                "available"
-              ]
+              "raw": "{{base_url}}/api/books/available",
+              "host": ["{{base_url}}"],
+              "path": ["api", "books", "available"]
             }
           },
           "response": []
@@ -89,17 +87,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/api/v1/books/{{book_id}}",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "3000",
-              "path": [
-                "api",
-                "v1",
-                "books",
-                "{{book_id}}"
+              "raw": "{{base_url}}/api/books/{{book_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "books", "{{book_id}}"],
+              "variable": [
+                {
+                  "key": "book_id",
+                  "value": "book-uuid-here"
+                }
               ]
             }
           },
@@ -117,21 +112,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Effective Java (Updated)\",\n  \"total_copies\": 10\n}"
+              "raw": "{\n  \"title\": \"Clean Code: Updated Edition\",\n  \"available_copies\": 4\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/api/v1/books/{{book_id}}",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "3000",
-              "path": [
-                "api",
-                "v1",
-                "books",
-                "{{book_id}}"
-              ]
+              "raw": "{{base_url}}/api/books/{{book_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "books", "{{book_id}}"]
             }
           },
           "response": []
@@ -142,17 +128,27 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/api/v1/books/{{book_id}}",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "3000",
-              "path": [
-                "api",
-                "v1",
-                "books",
-                "{{book_id}}"
+              "raw": "{{base_url}}/api/books/{{book_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "books", "{{book_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Books",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/books/search?q=clean+code",
+              "host": ["{{base_url}}"],
+              "path": ["api", "books", "search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "clean+code"
+                }
               ]
             }
           },
@@ -175,20 +171,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\"\n}"
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"membership_number\": \"MEM2024001\",\n  \"phone\": \"+1234567890\",\n  \"address\": \"123 Main St, City, Country\",\n  \"max_borrow_limit\": 3\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/api/v1/members",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "3000",
-              "path": [
-                "api",
-                "v1",
-                "members"
-              ]
+              "raw": "{{base_url}}/api/members",
+              "host": ["{{base_url}}"],
+              "path": ["api", "members"]
             }
           },
           "response": []
@@ -199,16 +187,18 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/api/v1/members",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "3000",
-              "path": [
-                "api",
-                "v1",
-                "members"
+              "raw": "{{base_url}}/api/members?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "members"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
               ]
             }
           },
@@ -220,18 +210,22 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/api/v1/members/{{member_id}}",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "3000",
-              "path": [
-                "api",
-                "v1",
-                "members",
-                "{{member_id}}"
-              ]
+              "raw": "{{base_url}}/api/members/{{member_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "members", "{{member_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Borrowed Books by Member",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/members/{{member_id}}/borrowed",
+              "host": ["{{base_url}}"],
+              "path": ["api", "members", "{{member_id}}", "borrowed"]
             }
           },
           "response": []
@@ -248,21 +242,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"John Doe Updated\",\n  \"email\": \"newemail@example.com\"\n}"
+              "raw": "{\n  \"name\": \"John D. Updated\",\n  \"phone\": \"+0987654321\"\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/api/v1/members/{{member_id}}",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "3000",
-              "path": [
-                "api",
-                "v1",
-                "members",
-                "{{member_id}}"
-              ]
+              "raw": "{{base_url}}/api/members/{{member_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "members", "{{member_id}}"]
             }
           },
           "response": []
@@ -273,41 +258,9 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/api/v1/members/{{member_id}}",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "3000",
-              "path": [
-                "api",
-                "v1",
-                "members",
-                "{{member_id}}"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Borrowed Books by Member",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:3000/api/v1/members/{{member_id}}/borrowed",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "3000",
-              "path": [
-                "api",
-                "v1",
-                "members",
-                "{{member_id}}",
-                "borrowed"
-              ]
+              "raw": "{{base_url}}/api/members/{{member_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "members", "{{member_id}}"]
             }
           },
           "response": []
@@ -329,21 +282,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"member_id\": \"{{member_id}}\",\n  \"book_id\": \"{{book_id}}\"\n}"
+              "raw": "{\n  \"book_id\": \"{{book_id}}\",\n  \"member_id\": \"{{member_id}}\",\n  \"notes\": \"For personal reading\"\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/api/v1/transactions/borrow",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "3000",
-              "path": [
-                "api",
-                "v1",
-                "transactions",
-                "borrow"
-              ]
+              "raw": "{{base_url}}/api/transactions/borrow",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions", "borrow"]
             }
           },
           "response": []
@@ -360,43 +304,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": ""
+              "raw": "{\n  \"condition\": \"good\",\n  \"notes\": \"Book returned in good condition\"\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/api/v1/transactions/{{transaction_id}}/return",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "3000",
-              "path": [
-                "api",
-                "v1",
-                "transactions",
-                "{{transaction_id}}",
-                "return"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get All Transactions",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:3000/api/v1/transactions",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "3000",
-              "path": [
-                "api",
-                "v1",
-                "transactions"
-              ]
+              "raw": "{{base_url}}/api/transactions/{{transaction_id}}/return",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions", "{{transaction_id}}", "return"]
             }
           },
           "response": []
@@ -407,17 +320,18 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/api/v1/transactions/overdue",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "3000",
-              "path": [
-                "api",
-                "v1",
-                "transactions",
-                "overdue"
+              "raw": "{{base_url}}/api/transactions/overdue?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions", "overdue"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
               ]
             }
           },
@@ -429,18 +343,54 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/api/v1/transactions/{{transaction_id}}",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "3000",
-              "path": [
-                "api",
-                "v1",
-                "transactions",
-                "{{transaction_id}}"
+              "raw": "{{base_url}}/api/transactions/{{transaction_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions", "{{transaction_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Transactions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/transactions?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
               ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Renew Book",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"extension_days\": 7\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/transactions/{{transaction_id}}/renew",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions", "{{transaction_id}}", "renew"]
             }
           },
           "response": []
@@ -451,21 +401,45 @@
       "name": "Fines",
       "item": [
         {
+          "name": "Pay Fine",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"payment_method\": \"card\",\n  \"amount_paid\": 5.00,\n  \"transaction_reference\": \"TXN123456789\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/fines/{{fine_id}}/pay",
+              "host": ["{{base_url}}"],
+              "path": ["api", "fines", "{{fine_id}}", "pay"]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Get All Fines",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/api/v1/fines",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "3000",
-              "path": [
-                "api",
-                "v1",
-                "fines"
+              "raw": "{{base_url}}/api/fines?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "fines"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
               ]
             }
           },
@@ -477,24 +451,51 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/api/v1/fines/{{fine_id}}",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "3000",
-              "path": [
-                "api",
-                "v1",
-                "fines",
-                "{{fine_id}}"
+              "raw": "{{base_url}}/api/fines/{{fine_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "fines", "{{fine_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Member Fines",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/fines/member/{{member_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "fines", "member", "{{member_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Fine Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/fines/report?start_date=2024-01-01&end_date=2024-01-31",
+              "host": ["{{base_url}}"],
+              "path": ["api", "fines", "report"],
+              "query": [
+                {
+                  "key": "start_date",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "end_date",
+                  "value": "2024-01-31"
+                }
               ]
             }
           },
           "response": []
         },
         {
-          "name": "Mark Fine as Paid",
+          "name": "Waive Fine",
           "request": {
             "method": "POST",
             "header": [
@@ -505,22 +506,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": ""
+              "raw": "{\n  \"reason\": \"First-time offense waiver\"\n}"
             },
             "url": {
-              "raw": "http://localhost:3000/api/v1/fines/{{fine_id}}/pay",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "3000",
-              "path": [
-                "api",
-                "v1",
-                "fines",
-                "{{fine_id}}",
-                "pay"
-              ]
+              "raw": "{{base_url}}/api/fines/{{fine_id}}/waive",
+              "host": ["{{base_url}}"],
+              "path": ["api", "fines", "{{fine_id}}", "waive"]
             }
           },
           "response": []
@@ -528,45 +519,136 @@
       ]
     },
     {
-      "name": "Health Check",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://localhost:3000/health",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "3000",
-          "path": [
-            "health"
-          ]
+      "name": "Business Rule Tests",
+      "item": [
+        {
+          "name": "Test Borrowing Limit",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"book_id\": \"{{book_id_1}}\",\n  \"member_id\": \"{{member_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/transactions/borrow",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions", "borrow"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Test Overdue Fine Calculation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"condition\": \"good\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/transactions/{{overdue_transaction_id}}/return",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions", "{{overdue_transaction_id}}", "return"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Test Member Suspension",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"book_id\": \"{{book_id}}\",\n  \"member_id\": \"{{overdue_member_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/transactions/borrow",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions", "borrow"]
+            }
+          },
+          "response": []
         }
-      },
-      "response": []
+      ]
     }
   ],
   "variable": [
     {
+      "key": "base_url",
+      "value": "http://localhost:3000"
+    },
+    {
       "key": "book_id",
-      "value": "",
-      "type": "string"
+      "value": "replace-with-actual-book-id"
     },
     {
       "key": "member_id",
-      "value": "",
-      "type": "string"
+      "value": "replace-with-actual-member-id"
     },
     {
       "key": "transaction_id",
-      "value": "",
-      "type": "string"
+      "value": "replace-with-actual-transaction-id"
     },
     {
       "key": "fine_id",
-      "value": "",
-      "type": "string"
+      "value": "replace-with-actual-fine-id"
+    },
+    {
+      "key": "book_id_1",
+      "value": "book-id-for-test-1"
+    },
+    {
+      "key": "overdue_transaction_id",
+      "value": "overdue-transaction-id"
+    },
+    {
+      "key": "overdue_member_id",
+      "value": "member-with-3-overdue-books"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "console.log('Request started:', new Date().toISOString());"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test('Status code is 200', function () {",
+          "    pm.response.to.have.status(200);",
+          "});",
+          "",
+          "pm.test('Response has success property', function () {",
+          "    var jsonData = pm.response.json();",
+          "    pm.expect(jsonData.success).to.be.true;",
+          "});"
+        ]
+      }
     }
   ]
 }

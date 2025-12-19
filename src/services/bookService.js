@@ -1,146 +1,232 @@
-const Book = require('../models/Book');
+const { Book } = require('../models');
+const { BusinessError } = require('../middleware/errorHandler');
 const { BOOK_STATUS, HTTP_STATUS } = require('../utils/constants');
+const { bookStateMachine } = require('../utils/stateMachine');
 
 class BookService {
-  // Create new book
+  // Create a new book
   async createBook(bookData) {
     try {
-      const book = await Book.create({
-        isbn: bookData.isbn,
-        title: bookData.title,
-        author: bookData.author,
-        category: bookData.category,
-        total_copies: bookData.total_copies,
-        available_copies: bookData.total_copies,
-        status: BOOK_STATUS.AVAILABLE,
-      });
-      return { success: true, book };
+      // Check if ISBN already exists
+      const existingBook = await Book.findOne({ where: { isbn: bookData.isbn } });
+      if (existingBook) {
+        throw new BusinessError('ISBN already exists', HTTP_STATUS.CONFLICT, 'DUPLICATE_ISBN');
+      }
+
+      // Set available copies equal to total copies if not provided
+      if (bookData.total_copies && !bookData.available_copies) {
+        bookData.available_copies = bookData.total_copies;
+      }
+
+      const book = await Book.create(bookData);
+      return book;
     } catch (error) {
-      return { success: false, error: error.message };
+      if (error instanceof BusinessError) throw error;
+      throw new BusinessError('Failed to create book', HTTP_STATUS.INTERNAL_SERVER_ERROR);
     }
   }
 
-  // Get all books
-  async getAllBooks() {
+  // Get all books with filtering and pagination
+  async getAllBooks(filters = {}, page = 1, limit = 10) {
     try {
-      const books = await Book.findAll();
-      return { success: true, books };
+      const whereClause = {};
+      
+      // Apply filters
+      if (filters.title) whereClause.title = { [Op.iLike]: `%${filters.title}%` };
+      if (filters.author) whereClause.author = { [Op.iLike]: `%${filters.author}%` };
+      if (filters.category) whereClause.category = filters.category;
+      if (filters.status) whereClause.status = filters.status;
+      if (filters.isbn) whereClause.isbn = filters.isbn;
+
+      const offset = (page - 1) * limit;
+      
+      const { count, rows: books } = await Book.findAndCountAll({
+        where: whereClause,
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+        order: [['createdAt', 'DESC']]
+      });
+
+      return {
+        books,
+        pagination: {
+          total: count,
+          page: parseInt(page),
+          limit: parseInt(limit),
+          pages: Math.ceil(count / limit)
+        }
+      };
     } catch (error) {
-      return { success: false, error: error.message };
+      throw new BusinessError('Failed to fetch books', HTTP_STATUS.INTERNAL_SERVER_ERROR);
     }
   }
 
   // Get available books
-  async getAvailableBooks() {
+  async getAvailableBooks(page = 1, limit = 10) {
     try {
-      const books = await Book.findAll({
-        where: { status: BOOK_STATUS.AVAILABLE },
+      const offset = (page - 1) * limit;
+      
+      const { count, rows: books } = await Book.findAndCountAll({
+        where: {
+          status: BOOK_STATUS.AVAILABLE,
+          available_copies: { [Op.gt]: 0 }
+        },
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+        order: [['title', 'ASC']]
       });
-      return { success: true, books };
+
+      return {
+        books,
+        pagination: {
+          total: count,
+          page: parseInt(page),
+          limit: parseInt(limit),
+          pages: Math.ceil(count / limit)
+        }
+      };
     } catch (error) {
-      return { success: false, error: error.message };
+      throw new BusinessError('Failed to fetch available books', HTTP_STATUS.INTERNAL_SERVER_ERROR);
     }
   }
 
   // Get book by ID
-  async getBookById(bookId) {
+  async getBookById(id) {
     try {
-      const book = await Book.findByPk(bookId);
+      const book = await Book.findByPk(id);
       if (!book) {
-        return { success: false, error: 'Book not found' };
+        throw new BusinessError('Book not found', HTTP_STATUS.NOT_FOUND, 'BOOK_NOT_FOUND');
       }
-      return { success: true, book };
+      return book;
     } catch (error) {
-      return { success: false, error: error.message };
+      if (error instanceof BusinessError) throw error;
+      throw new BusinessError('Failed to fetch book', HTTP_STATUS.INTERNAL_SERVER_ERROR);
     }
   }
 
   // Update book
-  async updateBook(bookId, updateData) {
+  async updateBook(id, updateData) {
     try {
-      const book = await Book.findByPk(bookId);
-      if (!book) {
-        return { success: false, error: 'Book not found' };
+      const book = await this.getBookById(id);
+      
+      // Validate state transition if status is being updated
+      if (updateData.status && updateData.status !== book.status) {
+        if (!bookStateMachine.canTransition(book.status, updateData.status)) {
+          throw new BusinessError(
+            `Invalid status transition from ${book.status} to ${updateData.status}`,
+            HTTP_STATUS.CONFLICT,
+            'INVALID_STATUS_TRANSITION'
+          );
+        }
+      }
+
+      // Update available copies if total copies is changed
+      if (updateData.total_copies && updateData.total_copies !== book.total_copies) {
+        const diff = updateData.total_copies - book.total_copies;
+        updateData.available_copies = Math.max(0, book.available_copies + diff);
       }
 
       await book.update(updateData);
-      return { success: true, book };
+      return book;
     } catch (error) {
-      return { success: false, error: error.message };
+      if (error instanceof BusinessError) throw error;
+      throw new BusinessError('Failed to update book', HTTP_STATUS.INTERNAL_SERVER_ERROR);
     }
   }
 
   // Delete book
-  async deleteBook(bookId) {
+  async deleteBook(id) {
     try {
-      const book = await Book.findByPk(bookId);
-      if (!book) {
-        return { success: false, error: 'Book not found' };
+      const book = await this.getBookById(id);
+      
+      // Check if book has active transactions
+      const { Transaction } = require('../models');
+      const activeTransactions = await Transaction.count({
+        where: {
+          book_id: id,
+          status: 'active'
+        }
+      });
+
+      if (activeTransactions > 0) {
+        throw new BusinessError(
+          'Cannot delete book with active transactions',
+          HTTP_STATUS.CONFLICT,
+          'BOOK_HAS_ACTIVE_TRANSACTIONS'
+        );
       }
 
       await book.destroy();
       return { success: true, message: 'Book deleted successfully' };
     } catch (error) {
-      return { success: false, error: error.message };
+      if (error instanceof BusinessError) throw error;
+      throw new BusinessError('Failed to delete book', HTTP_STATUS.INTERNAL_SERVER_ERROR);
     }
   }
 
-  // Update book status
-  async updateBookStatus(bookId, status) {
+  // Update book status using state machine
+  async updateBookStatus(id, newStatus) {
     try {
-      const book = await Book.findByPk(bookId);
-      if (!book) {
-        return { success: false, error: 'Book not found' };
+      const book = await this.getBookById(id);
+      
+      if (!bookStateMachine.canTransition(book.status, newStatus)) {
+        throw new BusinessError(
+          `Invalid status transition from ${book.status} to ${newStatus}`,
+          HTTP_STATUS.CONFLICT,
+          'INVALID_STATUS_TRANSITION'
+        );
       }
 
-      await book.update({ status });
-      return { success: true, book };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Decrease available copies
-  async decreaseAvailableCopies(bookId) {
-    try {
-      const book = await Book.findByPk(bookId);
-      if (!book) {
-        return { success: false, error: 'Book not found' };
+      // Additional validation based on status
+      if (newStatus === BOOK_STATUS.BORROWED && book.available_copies === 0) {
+        throw new BusinessError(
+          'No available copies to borrow',
+          HTTP_STATUS.CONFLICT,
+          'NO_AVAILABLE_COPIES'
+        );
       }
 
-      if (book.available_copies <= 0) {
-        return { success: false, error: 'No copies available' };
-      }
-
-      book.available_copies -= 1;
-      if (book.available_copies === 0) {
-        book.status = BOOK_STATUS.BORROWED;
-      }
-
+      book.status = newStatus;
       await book.save();
-      return { success: true, book };
+      
+      return book;
     } catch (error) {
-      return { success: false, error: error.message };
+      if (error instanceof BusinessError) throw error;
+      throw new BusinessError('Failed to update book status', HTTP_STATUS.INTERNAL_SERVER_ERROR);
     }
   }
 
-  // Increase available copies
-  async increaseAvailableCopies(bookId) {
+  // Search books
+  async searchBooks(query, page = 1, limit = 10) {
     try {
-      const book = await Book.findByPk(bookId);
-      if (!book) {
-        return { success: false, error: 'Book not found' };
-      }
+      const { Op } = require('sequelize');
+      const offset = (page - 1) * limit;
 
-      book.available_copies += 1;
-      if (book.status !== BOOK_STATUS.AVAILABLE && book.available_copies > 0) {
-        book.status = BOOK_STATUS.AVAILABLE;
-      }
+      const { count, rows: books } = await Book.findAndCountAll({
+        where: {
+          [Op.or]: [
+            { title: { [Op.iLike]: `%${query}%` } },
+            { author: { [Op.iLike]: `%${query}%` } },
+            { isbn: { [Op.iLike]: `%${query}%` } },
+            { category: { [Op.iLike]: `%${query}%` } }
+          ]
+        },
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+        order: [['title', 'ASC']]
+      });
 
-      await book.save();
-      return { success: true, book };
+      return {
+        books,
+        pagination: {
+          total: count,
+          page: parseInt(page),
+          limit: parseInt(limit),
+          pages: Math.ceil(count / limit)
+        }
+      };
     } catch (error) {
-      return { success: false, error: error.message };
+      throw new BusinessError('Failed to search books', HTTP_STATUS.INTERNAL_SERVER_ERROR);
     }
   }
 }
