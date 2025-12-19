@@ -2,105 +2,131 @@ const memberService = require('../services/memberService');
 const { HTTP_STATUS } = require('../utils/constants');
 
 class MemberController {
-  // Create a new member
-  async createMember(req, res, next) {
+  // Create member
+  async createMember(req, res) {
     try {
-      const member = await memberService.createMember(req.body);
+      const result = await memberService.createMember(req.body);
+      if (!result.success) {
+        return res
+          .status(HTTP_STATUS.BAD_REQUEST)
+          .json({ success: false, error: result.error });
+      }
       res.status(HTTP_STATUS.CREATED).json({
         success: true,
-        data: member
+        message: 'Member created successfully',
+        member: result.member,
       });
     } catch (error) {
-      next(error);
+      res.status(HTTP_STATUS.INTERNAL_ERROR).json({
+        success: false,
+        error: error.message,
+      });
     }
   }
 
   // Get all members
-  async getAllMembers(req, res, next) {
+  async getAllMembers(req, res) {
     try {
-      const { page = 1, limit = 10, ...filters } = req.query;
-      const result = await memberService.getAllMembers(filters, page, limit);
-      
+      const result = await memberService.getAllMembers();
+      if (!result.success) {
+        return res
+          .status(HTTP_STATUS.INTERNAL_ERROR)
+          .json({ success: false, error: result.error });
+      }
       res.status(HTTP_STATUS.OK).json({
         success: true,
-        ...result
+        members: result.members,
       });
     } catch (error) {
-      next(error);
+      res.status(HTTP_STATUS.INTERNAL_ERROR).json({
+        success: false,
+        error: error.message,
+      });
     }
   }
 
   // Get member by ID
-  async getMemberById(req, res, next) {
+  async getMemberById(req, res) {
     try {
-      const member = await memberService.getMemberById(req.params.id);
+      const result = await memberService.getMemberById(req.params.id);
+      if (!result.success) {
+        return res
+          .status(HTTP_STATUS.NOT_FOUND)
+          .json({ success: false, error: result.error });
+      }
       res.status(HTTP_STATUS.OK).json({
         success: true,
-        data: member
+        member: result.member,
       });
     } catch (error) {
-      next(error);
-    }
-  }
-
-  // Get borrowed books by member
-  async getBorrowedBooks(req, res, next) {
-    try {
-      const result = await memberService.getBorrowedBooks(req.params.id);
-      res.status(HTTP_STATUS.OK).json({
-        success: true,
-        ...result
+      res.status(HTTP_STATUS.INTERNAL_ERROR).json({
+        success: false,
+        error: error.message,
       });
-    } catch (error) {
-      next(error);
     }
   }
 
   // Update member
-  async updateMember(req, res, next) {
+  async updateMember(req, res) {
     try {
-      const member = await memberService.updateMember(req.params.id, req.body);
+      const result = await memberService.updateMember(req.params.id, req.body);
+      if (!result.success) {
+        return res
+          .status(HTTP_STATUS.NOT_FOUND)
+          .json({ success: false, error: result.error });
+      }
       res.status(HTTP_STATUS.OK).json({
         success: true,
-        data: member
+        message: 'Member updated successfully',
+        member: result.member,
       });
     } catch (error) {
-      next(error);
+      res.status(HTTP_STATUS.INTERNAL_ERROR).json({
+        success: false,
+        error: error.message,
+      });
     }
   }
 
   // Delete member
-  async deleteMember(req, res, next) {
+  async deleteMember(req, res) {
     try {
       const result = await memberService.deleteMember(req.params.id);
+      if (!result.success) {
+        return res
+          .status(HTTP_STATUS.NOT_FOUND)
+          .json({ success: false, error: result.error });
+      }
       res.status(HTTP_STATUS.OK).json({
         success: true,
-        ...result
+        message: result.message,
       });
     } catch (error) {
-      next(error);
+      res.status(HTTP_STATUS.INTERNAL_ERROR).json({
+        success: false,
+        error: error.message,
+      });
     }
   }
 
-  // Update member status
-  async updateMemberStatus(req, res, next) {
+  // Get borrowed books
+  async getBorrowedBooks(req, res) {
     try {
-      const { status, reason } = req.body;
-      if (!status) {
-        return res.status(HTTP_STATUS.BAD_REQUEST).json({
-          success: false,
-          message: 'Status is required'
-        });
+      const result = await memberService.getBorrowedBooks(req.params.id);
+      if (!result.success) {
+        return res
+          .status(HTTP_STATUS.NOT_FOUND)
+          .json({ success: false, error: result.error });
       }
-
-      const member = await memberService.updateMemberStatus(req.params.id, status, reason);
       res.status(HTTP_STATUS.OK).json({
         success: true,
-        data: member,
-        message: `Member status updated to ${status}`
+        transactions: result.transactions,
       });
     } catch (error) {
-      next(error);
+      res.status(HTTP_STATUS.INTERNAL_ERROR).json({
+        success: false,
+        error: error.message,
+      });
     }
   }
 }

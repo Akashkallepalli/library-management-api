@@ -1,111 +1,69 @@
+
 const fineService = require('../services/fineService');
 const { HTTP_STATUS } = require('../utils/constants');
 
 class FineController {
-  // Pay a fine
-  async payFine(req, res, next) {
-    try {
-      const result = await fineService.payFine(req.params.id, req.body);
-      res.status(HTTP_STATUS.OK).json({
-        success: true,
-        ...result
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
   // Get all fines
-  async getAllFines(req, res, next) {
+  async getAllFines(req, res) {
     try {
-      const { page = 1, limit = 20, ...filters } = req.query;
-      const result = await fineService.getAllFines(filters, page, limit);
-      
+      const result = await fineService.getAllFines();
+      if (!result.success) {
+        return res
+          .status(HTTP_STATUS.INTERNAL_ERROR)
+          .json({ success: false, error: result.error });
+      }
       res.status(HTTP_STATUS.OK).json({
         success: true,
-        ...result
+        fines: result.fines,
       });
     } catch (error) {
-      next(error);
+      res.status(HTTP_STATUS.INTERNAL_ERROR).json({
+        success: false,
+        error: error.message,
+      });
     }
   }
 
   // Get fine by ID
-  async getFineById(req, res, next) {
+  async getFineById(req, res) {
     try {
-      const fine = await fineService.getFineById(req.params.id);
-      res.status(HTTP_STATUS.OK).json({
-        success: true,
-        data: fine
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  // Get member fines
-  async getMemberFines(req, res, next) {
-    try {
-      const { member_id } = req.params;
-      const { page = 1, limit = 20 } = req.query;
-      
-      const result = await fineService.getMemberFines(member_id, page, limit);
-      res.status(HTTP_STATUS.OK).json({
-        success: true,
-        ...result
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  // Waive a fine
-  async waiveFine(req, res, next) {
-    try {
-      const { reason } = req.body;
-      const result = await fineService.waiveFine(req.params.id, reason);
-      
-      res.status(HTTP_STATUS.OK).json({
-        success: true,
-        ...result
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  // Generate fine report
-  async generateFineReport(req, res, next) {
-    try {
-      const { start_date, end_date } = req.query;
-      
-      if (!start_date || !end_date) {
-        return res.status(HTTP_STATUS.BAD_REQUEST).json({
-          success: false,
-          message: 'Start date and end date are required'
-        });
+      const result = await fineService.getFineById(req.params.id);
+      if (!result.success) {
+        return res
+          .status(HTTP_STATUS.NOT_FOUND)
+          .json({ success: false, error: result.error });
       }
-
-      const result = await fineService.generateFineReport(start_date, end_date);
       res.status(HTTP_STATUS.OK).json({
         success: true,
-        ...result
+        fine: result.fine,
       });
     } catch (error) {
-      next(error);
+      res.status(HTTP_STATUS.INTERNAL_ERROR).json({
+        success: false,
+        error: error.message,
+      });
     }
   }
 
-  // Calculate overdue fines (admin endpoint)
-  async calculateOverdueFines(req, res, next) {
+  // Mark fine as paid
+  async markFinePaid(req, res) {
     try {
-      const result = await fineService.calculateOverdueFines();
+      const result = await fineService.markFinePaid(req.params.id);
+      if (!result.success) {
+        return res
+          .status(HTTP_STATUS.CONFLICT)
+          .json({ success: false, error: result.error });
+      }
       res.status(HTTP_STATUS.OK).json({
         success: true,
-        ...result
+        message: 'Fine marked as paid',
+        fine: result.fine,
       });
     } catch (error) {
-      next(error);
+      res.status(HTTP_STATUS.INTERNAL_ERROR).json({
+        success: false,
+        error: error.message,
+      });
     }
   }
 }

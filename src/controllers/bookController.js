@@ -2,128 +2,131 @@ const bookService = require('../services/bookService');
 const { HTTP_STATUS } = require('../utils/constants');
 
 class BookController {
-  // Create a new book
-  async createBook(req, res, next) {
+  // Create book
+  async createBook(req, res) {
     try {
-      const book = await bookService.createBook(req.body);
+      const result = await bookService.createBook(req.body);
+      if (!result.success) {
+        return res
+          .status(HTTP_STATUS.BAD_REQUEST)
+          .json({ success: false, error: result.error });
+      }
       res.status(HTTP_STATUS.CREATED).json({
         success: true,
-        data: book
+        message: 'Book created successfully',
+        book: result.book,
       });
     } catch (error) {
-      next(error);
+      res.status(HTTP_STATUS.INTERNAL_ERROR).json({
+        success: false,
+        error: error.message,
+      });
     }
   }
 
   // Get all books
-  async getAllBooks(req, res, next) {
+  async getAllBooks(req, res) {
     try {
-      const { page = 1, limit = 10, ...filters } = req.query;
-      const result = await bookService.getAllBooks(filters, page, limit);
-      
+      const result = await bookService.getAllBooks();
+      if (!result.success) {
+        return res
+          .status(HTTP_STATUS.INTERNAL_ERROR)
+          .json({ success: false, error: result.error });
+      }
       res.status(HTTP_STATUS.OK).json({
         success: true,
-        ...result
+        books: result.books,
       });
     } catch (error) {
-      next(error);
+      res.status(HTTP_STATUS.INTERNAL_ERROR).json({
+        success: false,
+        error: error.message,
+      });
     }
   }
 
   // Get available books
-  async getAvailableBooks(req, res, next) {
+  async getAvailableBooks(req, res) {
     try {
-      const { page = 1, limit = 10 } = req.query;
-      const result = await bookService.getAvailableBooks(page, limit);
-      
+      const result = await bookService.getAvailableBooks();
+      if (!result.success) {
+        return res
+          .status(HTTP_STATUS.INTERNAL_ERROR)
+          .json({ success: false, error: result.error });
+      }
       res.status(HTTP_STATUS.OK).json({
         success: true,
-        ...result
+        books: result.books,
       });
     } catch (error) {
-      next(error);
+      res.status(HTTP_STATUS.INTERNAL_ERROR).json({
+        success: false,
+        error: error.message,
+      });
     }
   }
 
   // Get book by ID
-  async getBookById(req, res, next) {
+  async getBookById(req, res) {
     try {
-      const book = await bookService.getBookById(req.params.id);
+      const result = await bookService.getBookById(req.params.id);
+      if (!result.success) {
+        return res
+          .status(HTTP_STATUS.NOT_FOUND)
+          .json({ success: false, error: result.error });
+      }
       res.status(HTTP_STATUS.OK).json({
         success: true,
-        data: book
+        book: result.book,
       });
     } catch (error) {
-      next(error);
+      res.status(HTTP_STATUS.INTERNAL_ERROR).json({
+        success: false,
+        error: error.message,
+      });
     }
   }
 
   // Update book
-  async updateBook(req, res, next) {
+  async updateBook(req, res) {
     try {
-      const book = await bookService.updateBook(req.params.id, req.body);
+      const result = await bookService.updateBook(req.params.id, req.body);
+      if (!result.success) {
+        return res
+          .status(HTTP_STATUS.NOT_FOUND)
+          .json({ success: false, error: result.error });
+      }
       res.status(HTTP_STATUS.OK).json({
         success: true,
-        data: book
+        message: 'Book updated successfully',
+        book: result.book,
       });
     } catch (error) {
-      next(error);
+      res.status(HTTP_STATUS.INTERNAL_ERROR).json({
+        success: false,
+        error: error.message,
+      });
     }
   }
 
   // Delete book
-  async deleteBook(req, res, next) {
+  async deleteBook(req, res) {
     try {
       const result = await bookService.deleteBook(req.params.id);
-      res.status(HTTP_STATUS.OK).json({
-        success: true,
-        ...result
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  // Search books
-  async searchBooks(req, res, next) {
-    try {
-      const { q, page = 1, limit = 10 } = req.query;
-      if (!q) {
-        return res.status(HTTP_STATUS.BAD_REQUEST).json({
-          success: false,
-          message: 'Search query is required'
-        });
+      if (!result.success) {
+        return res
+          .status(HTTP_STATUS.NOT_FOUND)
+          .json({ success: false, error: result.error });
       }
-
-      const result = await bookService.searchBooks(q, page, limit);
       res.status(HTTP_STATUS.OK).json({
         success: true,
-        ...result
+        message: result.message,
       });
     } catch (error) {
-      next(error);
-    }
-  }
-
-  // Update book status
-  async updateBookStatus(req, res, next) {
-    try {
-      const { status } = req.body;
-      if (!status) {
-        return res.status(HTTP_STATUS.BAD_REQUEST).json({
-          success: false,
-          message: 'Status is required'
-        });
-      }
-
-      const book = await bookService.updateBookStatus(req.params.id, status);
-      res.status(HTTP_STATUS.OK).json({
-        success: true,
-        data: book,
-        message: `Book status updated to ${status}`
+      res.status(HTTP_STATUS.INTERNAL_ERROR).json({
+        success: false,
+        error: error.message,
       });
-    } catch (error) {
-      next(error);
     }
   }
 }

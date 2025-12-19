@@ -2,114 +2,121 @@ const transactionService = require('../services/transactionService');
 const { HTTP_STATUS } = require('../utils/constants');
 
 class TransactionController {
-  // Borrow a book
-  async borrowBook(req, res, next) {
+  // Borrow book
+  async borrowBook(req, res) {
     try {
-      const { book_id, member_id, notes } = req.body;
-      
-      if (!book_id || !member_id) {
+      const { member_id, book_id } = req.body;
+
+      if (!member_id || !book_id) {
         return res.status(HTTP_STATUS.BAD_REQUEST).json({
           success: false,
-          message: 'Book ID and Member ID are required'
+          error: 'member_id and book_id are required',
         });
       }
 
-      const result = await transactionService.borrowBook(book_id, member_id, notes);
+      const result = await transactionService.borrowBook(member_id, book_id);
+      if (!result.success) {
+        return res
+          .status(HTTP_STATUS.CONFLICT)
+          .json({ success: false, error: result.error });
+      }
       res.status(HTTP_STATUS.CREATED).json({
         success: true,
-        ...result
+        message: 'Book borrowed successfully',
+        transaction: result.transaction,
       });
     } catch (error) {
-      next(error);
+      res.status(HTTP_STATUS.INTERNAL_ERROR).json({
+        success: false,
+        error: error.message,
+      });
     }
   }
 
-  // Return a book
-  async returnBook(req, res, next) {
+  // Return book
+  async returnBook(req, res) {
     try {
-      const { condition, notes } = req.body;
-      const result = await transactionService.returnBook(req.params.id, condition, notes);
-      
-      res.status(HTTP_STATUS.OK).json({
-        success: true,
-        ...result
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
+      const { id } = req.params;
 
-  // Get overdue transactions
-  async getOverdueTransactions(req, res, next) {
-    try {
-      const { page = 1, limit = 20 } = req.query;
-      const result = await transactionService.getOverdueTransactions(page, limit);
-      
+      const result = await transactionService.returnBook(id);
+      if (!result.success) {
+        return res
+          .status(HTTP_STATUS.CONFLICT)
+          .json({ success: false, error: result.error });
+      }
       res.status(HTTP_STATUS.OK).json({
         success: true,
-        ...result
+        message: 'Book returned successfully',
+        transaction: result.transaction,
       });
     } catch (error) {
-      next(error);
-    }
-  }
-
-  // Get transaction by ID
-  async getTransactionById(req, res, next) {
-    try {
-      const transaction = await transactionService.getTransactionById(req.params.id);
-      res.status(HTTP_STATUS.OK).json({
-        success: true,
-        data: transaction
+      res.status(HTTP_STATUS.INTERNAL_ERROR).json({
+        success: false,
+        error: error.message,
       });
-    } catch (error) {
-      next(error);
     }
   }
 
   // Get all transactions
-  async getAllTransactions(req, res, next) {
+  async getAllTransactions(req, res) {
     try {
-      const { page = 1, limit = 20, ...filters } = req.query;
-      const result = await transactionService.getAllTransactions(filters, page, limit);
-      
+      const result = await transactionService.getAllTransactions();
+      if (!result.success) {
+        return res
+          .status(HTTP_STATUS.INTERNAL_ERROR)
+          .json({ success: false, error: result.error });
+      }
       res.status(HTTP_STATUS.OK).json({
         success: true,
-        ...result
+        transactions: result.transactions,
       });
     } catch (error) {
-      next(error);
+      res.status(HTTP_STATUS.INTERNAL_ERROR).json({
+        success: false,
+        error: error.message,
+      });
     }
   }
 
-  // Renew a book
-  async renewBook(req, res, next) {
+  // Get overdue transactions
+  async getOverdueTransactions(req, res) {
     try {
-      const { extension_days = 7 } = req.body;
-      const result = await transactionService.renewBook(req.params.id, extension_days);
-      
+      const result = await transactionService.getOverdueTransactions();
+      if (!result.success) {
+        return res
+          .status(HTTP_STATUS.INTERNAL_ERROR)
+          .json({ success: false, error: result.error });
+      }
       res.status(HTTP_STATUS.OK).json({
         success: true,
-        ...result
+        transactions: result.transactions,
       });
     } catch (error) {
-      next(error);
+      res.status(HTTP_STATUS.INTERNAL_ERROR).json({
+        success: false,
+        error: error.message,
+      });
     }
   }
 
-  // Get member borrowing history
-  async getMemberBorrowingHistory(req, res, next) {
+  // Get transaction by ID
+  async getTransactionById(req, res) {
     try {
-      const { member_id } = req.params;
-      const { page = 1, limit = 20 } = req.query;
-      
-      const result = await transactionService.getMemberBorrowingHistory(member_id, page, limit);
+      const result = await transactionService.getTransactionById(req.params.id);
+      if (!result.success) {
+        return res
+          .status(HTTP_STATUS.NOT_FOUND)
+          .json({ success: false, error: result.error });
+      }
       res.status(HTTP_STATUS.OK).json({
         success: true,
-        ...result
+        transaction: result.transaction,
       });
     } catch (error) {
-      next(error);
+      res.status(HTTP_STATUS.INTERNAL_ERROR).json({
+        success: false,
+        error: error.message,
+      });
     }
   }
 }
