@@ -1,0 +1,64 @@
+{
+  "info": {
+    "name": "Library Management API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Books",
+      "item": [
+        {
+          "name": "Create Book",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"isbn\": \"978-0-123456-78-9\", \"title\": \"The Great Gatsby\", \"author\": \"F. Scott Fitzgerald\", \"category\": \"Fiction\", \"total_copies\": 5}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/books",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "books"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Members",
+      "item": [
+        {
+          "name": "Create Member",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"John Doe\", \"email\": \"john@example.com\", \"membership_number\": \"LIB001\"}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/members",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "members"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

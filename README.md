@@ -1,300 +1,162 @@
+# 📚 Library Management System API
 
-# Library Management System API
-
-A comprehensive RESTful API for managing library operations including books, members, borrowing transactions, and fines.[file:2]
+A comprehensive RESTful API for managing library operations including books, members, borrowing transactions, and fines.
 
 ## Features
 
-- Complete CRUD operations for books and members.[file:2]
-- Borrow and return book transactions.[file:2]
-- Automatic fine calculation for overdue books.[file:2]
-- Member suspension when multiple books are overdue.[file:2]
-- Borrowing limit enforcement (max 3 active books per member).[file:2]
-- Prevention of borrowing when unpaid fines exist.[file:2]
-- 14‑day standard loan period.[file:2]
-- Overdue fine of 0.50 per day.[file:2]
+✅ Full CRUD operations for books and members  
+✅ Borrowing and returning system with 14-day loan period  
+✅ Automatic fine calculation ($0.50/day for overdue books)  
+✅ Member suspension on 3 concurrent overdue books  
+✅ Borrowing limit enforcement (max 3 books per member)  
+✅ Overdue transaction tracking and reporting  
+✅ Fine management and payment tracking  
 
 ## Tech Stack
 
-- Runtime: Node.js.[file:2]
-- Framework: Express.js.[file:2]
-- Database: PostgreSQL.[file:2]
-- ORM: Sequelize.[file:2]
-- Validation: Joi.[file:2]
-- Date/Time: moment.js.[file:2]
+- **Backend:** Node.js, Express.js
+- **Database:** PostgreSQL
+- **Package Manager:** npm
+- **Testing:** Postman
 
 ## Prerequisites
 
-- Node.js v14 or higher.[file:2]
-- PostgreSQL v12 or higher.[file:2]
-- npm or yarn installed.[file:2]
+- Node.js v14+ 
+- PostgreSQL 12+
+- Postman (for testing)
 
-## Setup Instructions
+## Installation
 
-### 1. Clone Repository
-
+### 1. Clone the repository
 ```bash
-git clone https://github.com/Akashkallepalli/library-management-api.git
+git clone 
 cd library-management-api
 ```
 
-### 2. Install Dependencies
-
+### 2. Install dependencies
 ```bash
 npm install
 ```
 
-### 3. Create Database
+### 3. Setup database
+- Create PostgreSQL database
+- Run SQL schema from `database_schema.sql`
 
-```bash
-psql -U postgres
-CREATE DATABASE library_management_db;
-\q
+### 4. Create .env file
 ```
-
-### 4. Configure Environment
-
-Create a `.env` file in the project root:
-
-```env
-NODE_ENV=development
-PORT=3000
-
-DB_HOST=localhost
 DB_USER=postgres
 DB_PASSWORD=your_password
-DB_NAME=library_management_db
+DB_HOST=localhost
 DB_PORT=5432
-
-API_VERSION=v1
+DB_NAME=library_management
+PORT=3000
+NODE_ENV=development
 ```
 
-### 5. Run the Application
-
+### 5. Start server
 ```bash
 npm run dev
 ```
 
-Server will be available at:
-
-- Base URL: `http://localhost:3000`
-- API base: `http://localhost:3000/api/v1`
-
 ## API Endpoints
 
 ### Books
-
-- `POST /api/v1/books` — Create book
-- `GET /api/v1/books` — Get all books
-- `GET /api/v1/books/available` — Get available books
-- `GET /api/v1/books/:id` — Get book by ID
-- `PUT /api/v1/books/:id` — Update book
-- `DELETE /api/v1/books/:id` — Delete book
-
-### Members
-
-- `POST /api/v1/members` — Create member
-- `GET /api/v1/members` — Get all members
-- `GET /api/v1/members/:id` — Get member by ID
-- `PUT /api/v1/members/:id` — Update member
-- `DELETE /api/v1/members/:id` — Delete member
-- `GET /api/v1/members/:id/borrowed` — Get borrowed books for a member
-
-### Transactions
-
-- `POST /api/v1/transactions/borrow` — Borrow book
-- `POST /api/v1/transactions/:id/return` — Return book
-- `GET /api/v1/transactions` — Get all transactions
-- `GET /api/v1/transactions/overdue` — Get overdue transactions
-- `GET /api/v1/transactions/:id` — Get transaction by ID
-
-### Fines
-
-- `GET /api/v1/fines` — Get all fines
-- `GET /api/v1/fines/:id` — Get fine by ID
-- `POST /api/v1/fines/:id/pay` — Mark fine as paid
-
-## Database Schema (Overview)
-
-### Books
-
-- `id` (UUID, PK)
-- `isbn` (VARCHAR, unique)
-- `title` (VARCHAR)
-- `author` (VARCHAR)
-- `category` (VARCHAR)
-- `status` (ENUM: `available`, `borrowed`, `reserved`, `maintenance`)
-- `total_copies` (INTEGER)
-- `available_copies` (INTEGER)
+- `POST /api/books` - Create book
+- `GET /api/books` - Get all books
+- `GET /api/books/available` - Get available books
+- `GET /api/books/:id` - Get book by ID
+- `PUT /api/books/:id` - Update book
+- `DELETE /api/books/:id` - Delete book
 
 ### Members
-
-- `id` (UUID, PK)
-- `name` (VARCHAR)
-- `email` (VARCHAR, unique)
-- `membership_number` (VARCHAR, unique)
-- `status` (ENUM: `active`, `suspended`)
+- `POST /api/members` - Create member
+- `GET /api/members` - Get all members
+- `GET /api/members/:id` - Get member by ID
+- `GET /api/members/:id/borrowed` - Get borrowed books
+- `PUT /api/members/:id` - Update member
+- `DELETE /api/members/:id` - Delete member
 
 ### Transactions
-
-- `id` (UUID, PK)
-- `book_id` (UUID, FK → books)
-- `member_id` (UUID, FK → members)
-- `borrowed_at` (TIMESTAMP)
-- `due_date` (TIMESTAMP)
-- `returned_at` (TIMESTAMP, nullable)
-- `status` (ENUM: `active`, `returned`, `overdue`)
+- `POST /api/transactions/borrow` - Borrow book
+- `POST /api/transactions/:id/return` - Return book
+- `GET /api/transactions/overdue` - Get overdue transactions
 
 ### Fines
+- `GET /api/fines` - Get all fines
+- `GET /api/fines/member/:memberId` - Get member fines
+- `POST /api/fines/:id/pay` - Mark fine as paid
 
-- `id` (UUID, PK)
-- `member_id` (UUID, FK → members)
-- `transaction_id` (UUID, FK → transactions)
-- `amount` (DECIMAL)
-- `paid_at` (TIMESTAMP, nullable)
+## Business Rules Enforced
 
-## Business Rules (Summary)
-
-- Max 3 concurrent books per member
-- Loan period: 14 days
-- Overdue fine: 0.50 per day
-- Block borrowing if member has unpaid fines
-- Automatically suspend member on 3+ overdue books
-
-## Example Requests
-
-### Create Book
-
-```http
-POST /api/v1/books
-Content-Type: application/json
-
-{
-  "isbn": "9780134685991",
-  "title": "Effective Java",
-  "author": "Joshua Bloch",
-  "category": "Programming",
-  "total_copies": 5
-}
-```
-
-### Create Member
-
-```http
-POST /api/v1/members
-Content-Type: application/json
-
-{
-  "name": "John Doe",
-  "email": "john@example.com"
-}
-```
-
-### Borrow Book
-
-```http
-POST /api/v1/transactions/borrow
-Content-Type: application/json
-
-{
-  "member_id": "uuid-here",
-  "book_id": "uuid-here"
-}
-```
-
-## Project Structure
-
-```
-library-management-api/
-├── src/
-│   ├── config/
-│   │   └── database.js
-│   ├── models/
-│   │   ├── Book.js
-│   │   ├── Member.js
-│   │   ├── Transaction.js
-│   │   └── Fine.js
-│   ├── controllers/
-│   │   ├── bookController.js
-│   │   ├── memberController.js
-│   │   ├── transactionController.js
-│   │   └── fineController.js
-│   ├── services/
-│   │   ├── bookService.js
-│   │   ├── memberService.js
-│   │   ├── transactionService.js
-│   │   └── fineService.js
-│   ├── routes/
-│   │   ├── bookRoutes.js
-│   │   ├── memberRoutes.js
-│   │   ├── transactionRoutes.js
-│   │   ├── fineRoutes.js
-│   │   └── index.js
-│   ├── middleware/
-│   │   ├── errorHandler.js
-│   │   └── validation.js
-│   ├── utils/
-│   │   ├── constants.js
-│   │   └── helpers.js
-│   └── index.js
-├── .env
-├── .gitignore
-├── package.json
-└── README.md
-```
+1. **Borrowing Limit:** Max 3 books per member simultaneously
+2. **Loan Period:** 14 days from borrowing date
+3. **Fine Calculation:** $0.50 per day overdue
+4. **Member Suspension:** Automatic on 3+ concurrent overdue books
+5. **Borrowing Restriction:** Members with unpaid fines cannot borrow
 
 ## Testing
 
-- Use Postman (or any REST client) to call the endpoints
-- Optionally import the provided Postman collection if available
-
-## Error Handling
-
-Standard HTTP status codes:
-
-- `200` — OK
-- `201` — Created
-- `400` — Bad Request
-- `404` — Not Found
-- `409` — Conflict (business rule violation)
-- `500` — Internal Server Error
-
-## Git Commands & Version Control
-
-```bash
-# Initialize repository
-git init
-git config user.name "Akashkallepalli"
-git config user.email "23mh1a1220@acoe.edu.in"
-
-# Commit workflow
-git add .
-git commit -m "Your commit message"
-git push origin main
-```
-
-## Troubleshooting
-
-### Database Connection Error
-
-- Verify PostgreSQL is running
-- Check `.env` database credentials
-- Ensure database `library_management_db` exists
-
-### Port Already in Use
-
-- Change `PORT` in `.env` file
-- Or kill the process: `netstat -ano | findstr :3000` (Windows)
-
-### Module Not Found
-
-- Run `npm install` to reinstall dependencies
-- Check node_modules folder exists
+1. Import `Library-API.postman_collection.json` into Postman
+2. Run test requests
+3. Verify responses match expected formats
 
 ## License
 
 MIT
+```
 
-## Author
+---
 
-Kallepalli Akash Sai Ganesh Govind— 2025
+## Deployment (Optional)
+
+### Deploy to Heroku
+
+```bash
+# 1. Create Heroku account at heroku.com
+
+# 2. Install Heroku CLI
+# Download from: https://devcenter.heroku.com/articles/heroku-cli
+
+# 3. Login to Heroku
+heroku login
+
+# 4. Create app
+heroku create your-app-name
+
+# 5. Set environment variables
+heroku config:set DB_USER=your_db_user
+heroku config:set DB_PASSWORD=your_db_password
+heroku config:set DB_HOST=your_db_host
+heroku config:set DB_NAME=your_db_name
+
+# 6. Push to Heroku
+git push heroku main
+```
+
+---
+
+## Troubleshooting
+
+### "Database connection failed"
+- Check if PostgreSQL is running
+- Verify .env credentials
+- Ensure database exists
+
+### "Port 3000 already in use"
+```bash
+# Change PORT in .env or
+npx kill-port 3000
+```
+
+### "npm install fails"
+```bash
+# Clear cache and retry
+npm cache clean --force
+npm install
+```
+
+---
+
+## Support & Contact
+
+For issues or questions, please open a GitHub issue.
