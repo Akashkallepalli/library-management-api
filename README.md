@@ -41,6 +41,16 @@ npm install
 ### 3. Setup database
 - Create PostgreSQL database
 - Run SQL schema from `database_schema.sql`
+# 1. Create database
+```
+psql -U postgres -c "CREATE DATABASE library_management;"
+
+# 2. Run schema file
+psql -U postgres -d library_management -f database_schema.sql
+
+
+# 3. Done! ✅
+```
 
 ### 4. Create .env file
 ```
